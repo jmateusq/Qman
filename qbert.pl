@@ -111,11 +111,10 @@ atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% AÇÕES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1) :- %se estiver em modo poder, liga o bloco
-    liga_bloco((L,C),Blocos,Blocos1).
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % movimento diagonal superior esquerda
 diagonal_sup_esq((L,C), (L1,C1)) :-
     L1 is L + 1,

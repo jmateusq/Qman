@@ -1,74 +1,119 @@
-estado(PosQbert, Modo, Blocos, DiscoC, DiscoM, MovimentosRestantes).
+:- dynamic debug_flag/0.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% UTIL: debug simples
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+debug_on  :- (debug_flag -> true ; assertz(debug_flag)).
+debug_off :- (retract(debug_flag) -> true ; true).
 
-% posição inicial
-inicio(estado((8,h), normal, todos_desligados, ativo, ativo, 50)).
+dbg(Fmt, Args) :- (debug_flag -> format(Fmt, Args) ; true).
 
-% posições especiais
-posicao_inicial((8,h)).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ESTADO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% estado(PosQbert, Modo, Blocos, DiscoC, DiscoM, MovimentosRestantes).
+% INICIO DO JOGO
+inicio(estado((8,h), normal, [], ativo, ativo, 50)).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MAPA ESTÁTICO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disco((5,c)).
 disco((5,m)).
-vermelho((1,a)).
-vermelho((1,c)).
-vermelho((1,e)).
-vermelho((1,g)).
-vermelho((1,i)).
-vermelho((1,k)).
-vermelho((1,m)).
+
+vermelho((1,a)). 
+vermelho((1,c)). 
+vermelho((1,e)). 
+vermelho((1,g)). 
+vermelho((1,i)). 
+vermelho((1,k)). 
+vermelho((1,m)). 
 vermelho((1,o)).
-
-vermelho((3,a)).
+vermelho((3,a)). 
 vermelho((3,o)).
-
-vermelho((4,b)).
+vermelho((4,b)). 
 vermelho((4,n)).
-
-vermelho((6,d)).
+vermelho((6,d)). 
 vermelho((6,l)).
-
-vermelho((7,e)).
+vermelho((7,e)). 
 vermelho((7,k)).
-
-vermelho((8,f)).
+vermelho((8,f)). 
 vermelho((8,j)).
-
-vermelho((9,g)).
+vermelho((9,g)). 
 vermelho((9,i)).
 
-% Posições inacessíveis (nao verdes, discos ou vermelhas)
+verde((8,h)).
+verde((7,g)). 
+verde((7,i)).
+verde((6,f)). 
+verde((6,h)). 
+verde((6,j)).
+verde((5,e)). 
+verde((5,g)). 
+verde((5,i)). 
+verde((5,k)).
+verde((4,d)). 
+verde((4,f)). 
+verde((4,h)). 
+verde((4,j)).
+verde((3,c)). 
+verde((3,e)). 
+verde((3,g)). 
+verde((3,i)). 
+verde((3,k)). 
+verde((3,m)).
+verde((2,b)). 
+verde((2,d)). 
+verde((2,f)). 
+verde((2,h)). 
+verde((2,j)). 
+verde((2,l)). 
+verde((2,n)).
+
+% Inimigos estáticos
+inimigo(piolho, (4,f)).
+inimigo(teju, (6,j)).
+inimigo(teju, (2,h)).
+inimigo(Pos) :- inimigo(_, Pos).
+
+% Posições fora do mapa
 inacessivel((X,Y)) :-
     \+ verde((X,Y)),
     \+ disco((X,Y)),
     \+ vermelho((X,Y)).
 
-% Posições verdes 
-verde((8,h)).
-verde((7,g)).
-verde((7,i)).
-verde((6,f)).
-verde((6,h)).
-verde((6,j)).
-verde((5,e)).
-verde((5,g)).
-verde((5,i)).
-verde((5,k)).
-verde((4,d)).
-verde((4,f)).
-verde((4,h)).
-verde((4,j)).
-verde((3,c)).
-verde((3,e)).
-verde((3,g)).
-verde((3,i)).
-verde((3,k)).
-verde((3,m)).
-verde((2,b)).
-verde((2,d)).
-verde((2,f)).
-verde((2,h)).
-verde((2,j)).
-verde((2,l)).
-verde((2,n)).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% COLUNAS COMO LETRAS: vizinhos esquerda/direita
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+colunas([a,b,c,d,e,f,g,h,i,j,k,l,m,n,o]).
+
+col_esq(C, C1) :-
+    colunas(Cs), nth0(I, Cs, C), I > 0, I1 is I - 1, nth0(I1, Cs, C1).
+
+col_dir(C, C1) :-
+    colunas(Cs), nth0(I, Cs, C), length(Cs, N), I < N - 1,
+    I1 is I + 1, nth0(I1, Cs, C1).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ATUALIZAÇÃO DE BLOCOS (liga idempotente; só mexe em Blocos)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% atualiza_blocos(+Modo, +Pos, +BlocosIn, -BlocosOut)
+% (Modo por enquanto não altera a regra; fácil estender depois)
+atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
+    ( member(Pos, BlocosIn) %se o bloco já está ligado, não faz nada
+    -> BlocosOut = BlocosIn
+    ; BlocosOut = [Pos|BlocosIn] %senão, liga o bloco
+    ),
+    dbg('[atualiza_blocos] Pos ~w -> ~w~n', [Pos, BlocosOut]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1) :- %se estiver em modo poder, liga o bloco
+    liga_bloco((L,C),Blocos,Blocos1).
 
 
 % movimento diagonal superior esquerda

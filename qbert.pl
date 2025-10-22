@@ -22,59 +22,60 @@ inicio(estado((8,h), normal, [], ativo, ativo, 50)).
 disco((5,c)).
 disco((5,m)).
 
-vermelho((1,a)). 
-vermelho((1,c)). 
-vermelho((1,e)). 
-vermelho((1,g)). 
-vermelho((1,i)). 
-vermelho((1,k)). 
-vermelho((1,m)). 
-vermelho((1,o)).
-vermelho((3,a)). 
-vermelho((3,o)).
-vermelho((4,b)). 
-vermelho((4,n)).
-vermelho((6,d)). 
-vermelho((6,l)).
-vermelho((7,e)). 
-vermelho((7,k)).
-vermelho((8,f)). 
-vermelho((8,j)).
+vermelho((9,a)). 
+vermelho((9,c)). 
+vermelho((9,e)). 
 vermelho((9,g)). 
-vermelho((9,i)).
+vermelho((9,i)). 
+vermelho((9,k)). 
+vermelho((9,m)). 
+vermelho((9,o)).
+vermelho((7,a)). 
+vermelho((7,o)).
+vermelho((6,b)). 
+vermelho((6,n)).
+vermelho((4,d)). 
+vermelho((4,l)).
+vermelho((3,e)). 
+vermelho((3,k)).
+vermelho((2,f)). 
+vermelho((2,j)).
+vermelho((1,g)). 
+vermelho((1,i)).
 
-verde((8,h)).
-verde((7,g)). 
-verde((7,i)).
-verde((6,f)). 
-verde((6,h)). 
-verde((6,j)).
-verde((5,e)). 
-verde((5,g)). 
-verde((5,i)). 
-verde((5,k)).
-verde((4,d)). 
+verde((2,h)).
+verde((3,g)). 
+verde((3,i)).
 verde((4,f)). 
 verde((4,h)). 
 verde((4,j)).
-verde((3,c)). 
-verde((3,e)). 
-verde((3,g)). 
-verde((3,i)). 
-verde((3,k)). 
-verde((3,m)).
-verde((2,b)). 
-verde((2,d)). 
-verde((2,f)). 
-verde((2,h)). 
-verde((2,j)). 
-verde((2,l)). 
-verde((2,n)).
+verde((5,e)). 
+verde((5,g)). 
+verde((5,i)).
+verde((5,k)).
+verde((6,d)). 
+verde((6,f)). 
+verde((6,h)). 
+verde((6,j)).
+verde((6,l)).
+verde((7,c)). 
+verde((7,e)). 
+verde((7,g)). 
+verde((7,i)). 
+verde((7,k)). 
+verde((7,m)).
+verde((8,b)). 
+verde((8,d)). 
+verde((8,f)). 
+verde((8,h)). 
+verde((8,j)). 
+verde((8,l)). 
+verde((8,n)).
 
 % Inimigos estáticos
-inimigo(piolho, (4,f)).
-inimigo(teju, (6,j)).
-inimigo(teju, (2,h)).
+inimigo(piolho, (6,f)).
+inimigo(teju, (4,j)).
+inimigo(teju, (8,h)).
 inimigo(Pos) :- inimigo(_, Pos).
 
 % Posições fora do mapa
@@ -96,12 +97,20 @@ col_dir(C, C1) :-
     colunas(Cs), nth0(I, Cs, C), length(Cs, N), I < N - 1,
     I1 is I + 1, nth0(I1, Cs, C1).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DIAGONAIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+diagonal_sup_esq((L,C), (L1,C1)) :- L1 is L - 1, col_esq(C, C1).
+diagonal_sup_dir((L,C), (L1,C1)) :- L1 is L - 1, col_dir(C, C1).
+diagonal_inf_esq((L,C), (L1,C1)) :- L1 is L + 1, col_esq(C, C1).
+diagonal_inf_dir((L,C), (L1,C1)) :- L1 is L + 1, col_dir(C, C1).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ATUALIZAÇÃO DE BLOCOS (liga idempotente; só mexe em Blocos)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% atualiza_blocos(+Modo, +Pos, +BlocosIn, -BlocosOut)
-% (Modo por enquanto não altera a regra; fácil estender depois)
+% atualiza_blocos(+Modo, +Pos, +BlocosIn, -BlocosOut) (+:conhecido; -:retornado)
+% (Modo por enquanto não altera a regra)
 atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
     ( member(Pos, BlocosIn) %se o bloco já está ligado, não faz nada
     -> BlocosOut = BlocosIn
@@ -113,28 +122,23 @@ atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AÇÕES
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% helper: aplica atualização condicional se destino for acessivel
+pos_destino((L,C), (L1,C1), PredDiag) :- 
+    call(PredDiag, (L,C), (L1,C1)),
+    \+ inacessivel((L1,C1)).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% movimento diagonal superior esquerda
-diagonal_sup_esq((L,C), (L1,C1)) :-
-    L1 is L + 1,
-    C1 is C - 1.
 acao(mover_sup_esq, %nome da ação
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
-    diagonal_sup_esq((L,C),(L1,C1)),
+    pos_destino((L,C),(L1,C1),diagonal_sup_esq),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1),
     ;Blocos1 = Blocos
     ),
-    %contagem de movimentos independe de ter alterado bloco ou nao
     M1 is M - 1.
+    dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 
-% movimento diagonal superior direita
-diagonal_sup_dir((L,C), (L1,C1)) :-
-    L1 is L + 1,
-    C1 is C + 1.
 acao(mover_sup_dir,
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante

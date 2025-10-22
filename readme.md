@@ -12,31 +12,28 @@
 
 ## 1. RESUMO DO PROJETO
 
-O jogo Q\*BERT é um clássico arcade em que o jogador controla o personagem-título — uma pequena criatura laranja e esférica com um focinho alongado. O objetivo é ligar todos os blocos da pirâmide, eliminar os inimigos e completar a fase em no máximo 50 movimentos.
+O jogo Q*BERT é um clássico arcade em que o jogador controla o personagem-título — uma pequena criatura laranja e esférica com um focinho alongado. O objetivo é ligar todos os blocos da pirâmide, eliminar os inimigos e completar a fase em no máximo 50 movimentos.
 
-A pirâmide é formada por 28 blocos, dispostos de forma triangular. Q\*BERT começa no topo e pode se mover apenas para as quatro diagonais adjacentes (superior esquerda, superior direita, inferior esquerda e inferior direita).
+A pirâmide é formada por 28 blocos, dispostos de forma triangular. Q*BERT começa no topo e pode se mover apenas para as quatro diagonais adjacentes (superior esquerda, superior direita, inferior esquerda e inferior direita).
 
-No início da fase, todos os blocos estão desligados (0). Sempre que Q\*BERT pisa em um bloco, ele liga esse bloco (1). Quando um disco é usado, ele se torna vermelho, indicando que já foi ativado.
+No início da fase, todos os blocos estão desligados (0). Sempre que Q*BERT pisa em um bloco, ele liga esse bloco (1). Quando um disco é usado, ele se torna vermelho, indicando que já foi ativado.
 
 O jogo apresenta uma variedade de inimigos com comportamentos distintos:
-
-*   **Coily** – Aparece inicialmente como uma bola roxa que desce pela pirâmide. Ao alcançar a base, transforma-se em uma cobra e escolhe um local de parada. Pode ser derrotado se Q\*Bert utiliza um disco lateral, que lhe concede o poder de eliminar inimigos.
-*   **Bolas coloridas** – Caem da segunda fileira da pirâmide.
-    *   **Vermelhas:** são letais para Q\*BERT.
-    *   **Verdes:** concedem 5 passos extras para o jogador.
+*   **Teju** – A Losango roxo que podem impedir que Q*BERT chegue ao disco. Pode cair em qualquer espaço do tabuleiro, menos na linha 3.
+*   **Piolho** – Estrela amarela são letais para Q*BERT. Podem cair em todo o cenário, menos na linha 8.
 
 ### DISCOS LATERAIS
 
-Nos lados esquerdo e direito da pirâmide existem discos flutuantes multicoloridos. Quando Q\*Bert salta em um disco, ele é transportado de volta ao topo da pirâmide.
+Nos lados esquerdo e direito da pirâmide existem discos flutuantes multicoloridos. Quando Q*BERT salta em um disco, ele é transportado de volta ao topo da pirâmide.
 
-Ao pegar o disco do lado esquerdo, Q\*BERT ganha o poder de eliminar inimigos, e o disco não pode ser reutilizado. Além disso, o disco inverte o comportamento dos blocos: ao pisar em um bloco ligado (1), Q\*BERT o desliga (0), e ao pisar em um bloco desligado (0), ele o liga (1).
+Ao pegar o disco do lado esquerdo, Q*BERT ganha o poder de eliminar inimigos, e o disco não pode ser reutilizado. Além disso, o disco inverte o comportamento dos blocos: ao pisar em um bloco ligado (1), Q*BERT o desliga (0), e ao pisar em um bloco desligado (0), ele o liga (1).
 
 ### PONTUAÇÃO E RECOMPENSAS
 
 O sistema de pontuação recompensa tanto ações básicas quanto estratégicas:
 
 *   \+25 pontos por mudar a cor de um cubo.
-*   \+500 pontos por derrotar Coily com o uso de um disco.
+*   \+500 pontos por derrotar Teju com o uso de um disco.
 *   \+1 pontos por cada movimento válido realizado por Q\*BERT.
 *   **Bônus de fase:** começa em 1.000 pontos na primeira tela do Nível 1 e aumenta 250 pontos por cada conclusão subsequente.
 
@@ -52,7 +49,7 @@ O desempenho do agente Q\*BERT é avaliado conforme os seguintes critérios:
 
 *   \+25 pontos por mudar a cor (ligar) de um bloco.
 *   \+1 ponto por cada movimento válido.
-*   \+500 pontos por derrotar Coily (ou outro inimigo) após adquirir o poder com o disco.
+*   \+500 pontos por derrotar Teju (ou outro inimigo) após adquirir o poder com o disco.
 *   Bônus de fase: começa em 1000 pontos, aumentando 250 pontos por cada conclusão subsequente.
 *   **Penalizações:**
     *   Morte do personagem (em blocos de perigo) = perda da fase.
@@ -65,21 +62,24 @@ O desempenho do agente Q\*BERT é avaliado conforme os seguintes critérios:
 ### E (Environment) – Ambiente
 
 *   **Tipo:** Ambiente parcialmente observável, dinâmico e estocástico (há aleatoriedade nos inimigos).
-*   **Cenário:** Grade 9x15 composta por 135 estados possíveis.
+*   **Cenário:** Grade 9x15 composta por 50 estados possíveis.
 *   **Características dos blocos:**
     *   **Verdes:** acessíveis a Q\*BERT e inimigos.
-    *   **Azuis:** discos especiais acessíveis apenas a Q\*Bert — ao pisar, ele é teletransportado para `(8,H)`.
+    *   **Azuis:** discos especiais acessíveis apenas a Q\*Bert — ao pisar, ele é teletransportado para `(2,H)`.
     *   **Vermelhos:** blocos perigosos — causam a morte do personagem.
     *   **Cinzas:** blocos inacessíveis a todos.
 *   **Estados especiais:**
-    *   **(8,H):** posição inicial do agente Q\*BERT
+    *   **(2,H):** posição inicial do agente Q\*BERT
     *   **(5,C)** e **(5,M):** discos que concedem poderes.
     *   Demais blocos podem estar ligados (1) ou desligados (0).
 *   **Inimigos:**
-    *   Bolas vermelhas e verdes e Coily (bola roxa) descem diagonalmente, escolhendo aleatoriamente entre os dois blocos inferiores.
+    ![Teju](imagesMD/Teju.png)
+    ![Piolho](imagesMD/Piolho.png)
+
+    *   Piolho (estrela) e Teju (losango roxo) descem diagonalmente, escolhendo aleatoriamente onde parar no cenário.
     *   Inimigos não podem acessar blocos azuis ou cinzas.
 *   **Regra do disco:**
-    *   Após usar um disco, Q\*BERT retorna ao topo `(8,H)`.
+    *   Após usar um disco, Q\*BERT retorna ao topo `(2,H)`.
     *   O disco torna-se vermelho (inutilizável).
     *   O poder do disco permite matar inimigos e inverter o comportamento dos blocos (pisar liga ↔ desliga).
 
@@ -90,7 +90,7 @@ O agente Q\*BERT pode executar as seguintes ações:
 *   Mover-se diagonalmente em qualquer uma das quatro direções possíveis:
     *   superior esquerda, superior direita, inferior esquerda, inferior direita.
 *   Ativar blocos (pisar em blocos e alterar seu estado 0→1 ou 1→0 após obter o disco).
-*   Usar discos azuis para ser teleportado ao topo `(H9)`.
+*   Usar discos azuis para ser teleportado ao topo `(2,H)`.
 *   Eliminar inimigos (após adquirir o poder do disco).
 *   Esperar (em caso de pausa após eliminar inimigos, se houver).
 
@@ -122,7 +122,7 @@ O agente Q\*BERT pode perceber:
 *   **Pontuação:**
     *   \+1 por mover para um bloco válido.
     *   \+5 ao ligar um bloco 0→1.
-    *   \+20 por matar inimigo (Coily ou bola vermelha) quando com poder.
+    *   \+20 por matar inimigo (Teju ou Piolho) quando com poder.
     *   \+10 por usar disco válido (teleporte).
     *   Episódio termina com vitória quando (blocos=1 AND inimigos=0) antes ou no 50º movimento.
 
@@ -131,28 +131,26 @@ O agente Q\*BERT pode perceber:
 **Layout e tipos de célula:**
 
 *   **Verde:** bloco acessível (por todos);
-    *   `(8,H)` é acessível apenas a Q\*BERT e é a posição inicial.
+    *   `(2,H)` é acessível apenas a Q\*BERT e é a posição inicial.
 *   **Cinza:** inacessível para todos (parede/vazio).
 *   **Azul:** discos em `(5,C)` e `(5,M)` (acessíveis só por Q\*BERT); após uso viram vermelho (inativo).
 *   **Vermelho:** bordas/poços; entrar em qualquer um dos estados mortais abaixo causa morte imediata.
 *   **Estados mortais (entrar = morte):**
-    *   `(1,A) (1,C) (1,E) (1,G) (1,I) (1,K) (1,M) (1,O), (3,A) (3,O), (4,B) (4,N), (6,D) (6,L), (7,E) (7,K), (8,F) (8,J), (9,G) (9,I)`.
+    *   `(1,G) (1,I), (2,F) (2,J), (3,E) (3,K), (4,D) (4,L), (6,B) (6,N), (7,A) (7,O), (9,A) (9,C), (9,E) (9,G), (9,I) (9,K), (9,M) (9,O).`.
 
 **REGRAS GLOBAIS:**
 
 *   Q\*BERT se move apenas nas diagonais:
     *   superior direita, superior esquerda, inferior direita e inferior esquerda entre vizinhos válidos.
-*   Inimigos (bolas vermelhas e Coily) descem níveis:
-    *   a cada passo escolhem aleatoriamente uma das duas diagonais inferiores possíveis.
-*   Teleporte: ao pular num disco azul ⇒ Q\*BERT vai para `(8,H)`. O disco usado torna-se vermelho (inativo).
-*   Coily morre se Q\*BERT usar disco estando a ≤ 2 movimentos de distância (Coily salta para onde estava o disco e cai).
+*   Inimigos (Piolho e Teju) descem diagonalmente, escolhendo aleatoriamente onde parar no cenário.
+*   Teleporte: ao pular num disco azul ⇒ Q\*BERT vai para `(2,H)`. O disco usado torna-se vermelho (inativo).
 *   Blocos começam desligados (0).
 
 **ESTADOS DO AGENTE:**
 
 *   **MODO\_NORMAL** (início): sem poder; ao pisar num verde: 0→1 (liga).
-*   **MODO\_PODER** (após pegar um disco): teleporta para `(9,H)`; ganha habilidade de matar inimigos por contato, comportamento de cor inverte (pisar troca: 1→0, 0→1).
-*   **MODO\_FINALIZAÇÃO** (após matar todos os inimigos e pegar o outro disco): teleporta para `(9,H)` e volta a inverter os blocos.
+*   **MODO\_PODER** (após pegar um disco): teleporta para `(2,H)`; ganha habilidade de matar inimigos por contato, comportamento de cor inverte (pisar troca: 1→0, 0→1).
+*   **MODO\_FINALIZAÇÃO** (após matar todos os inimigos e pegar o outro disco): teleporta para `(2,H)` e volta a inverter os blocos.
 
 ### A (Actuators) – Atuadores
 
@@ -163,7 +161,7 @@ O agente Q\*BERT pode perceber:
 
 **Percepção total do estado:**
 
-*   Posição de Q\*BERT (início em `(8,H)`).
+*   Posição de Q\*BERT (início em `(2,H)`).
 *   Modo atual: `NORMAL` | `PODER` | `FINALIZAÇÃO`.
 *   Contador de movimentos restantes (de 50 até 0).
 *   Mapa com tipo de cada célula (verde/cinza/azul/vermelho) e estado de cor dos verdes (0/1).
@@ -176,18 +174,16 @@ O agente Q\*BERT pode perceber:
 
 ### ESTRUTURA DE ESTADOS:
 
-*   **PosQBert:** posição do agente `(8,H)`.
+*   **PosQBert:** posição do agente `(2,H)`.
 *   **Modo:** normal | poder | finalizado.
 *   **Blocos:** lista com o estado de cada bloco verde (ligado=1 / desligado=0).
 *   **DiscoC (DC) , DiscoM (DM):** ativo/usado.
 *   **MovimentosRestantes:** número de passos (até 50).
 
-![Estrutura_Estado](imagesMD/Estrutura_Estado.png)
-
 ### Fatos Iniciais:
 
 *   Posição inicial e posições especiais.
-    *   **(8,H):** Posição inicial.
+    *   **(2,H):** Posição inicial.
     *   **normal:** modo padrão (sem poder).
     *   **todos\_desligados:** todos os blocos verdes estão em 0.
     *   **ativo, ativo:** os discos C e M ainda podem ser usados.
@@ -200,14 +196,11 @@ Esses dados são a base fixa do ambiente.
 
 ![Pos_Inicial](imagesMD/Pos_Inicial.png)
 
-![Discos](imagesMD/Discos.png)
-
 ![Pos_Inacessivel](imagesMD/Pos_Inacessivel.png)
 
 ![Pos_Vermelha](imagesMD/Pos_Vermelha.png)
 
 ![Pos_Verde](imagesMD/Pos_Verde.png)
-
 
 (O verde precisa ser feito para todas as posições possíveis).
 

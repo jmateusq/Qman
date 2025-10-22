@@ -11,7 +11,7 @@ dbg(Fmt, Args) :- (debug_flag -> format(Fmt, Args) ; true).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ESTADO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% estado(PosQbert, Modo, Blocos, DiscoC, DiscoM, MovimentosRestantes).
+estado(PosQbert, Modo, Blocos, DiscoC, DiscoM, MovimentosRestantes).
 % INICIO DO JOGO
 inicio(estado((8,h), normal, [], ativo, ativo, 50)).
 

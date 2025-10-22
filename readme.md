@@ -73,6 +73,7 @@ O desempenho do agente Q\*BERT é avaliado conforme os seguintes critérios:
     *   **(5,C)** e **(5,M):** discos que concedem poderes.
     *   Demais blocos podem estar ligados (1) ou desligados (0).
 *   **Inimigos:**
+
     ![Teju](imagesMD/Teju.png)
     ![Piolho](imagesMD/Piolho.png)
 
@@ -196,7 +197,7 @@ Esses dados são a base fixa do ambiente.
 
 ![Pos_Inicial](imagesMD/Pos_Inicial.png)
 
-![Pos_Inacessivel](imagesMD/Pos_Inacessivel.png)
+![Pos_Inacessivel_Inimigos](imagesMD/Pos_Inacessivel_Inimigos.png)
 
 ![Pos_Vermelha](imagesMD/Pos_Vermelha.png)
 
@@ -214,25 +215,27 @@ São os movimentos que o agente pode realizar.
     *   `acao(mover_sup_esq, EstadoAntes, EstadoDepois)`
     *   “Existe uma ação chamada `mover_sup_esq` que transforma o `EstadoAntes` no `EstadoDepois`."
 *   **Corpo (parte depois de `:-`):**
-    *   `diagonal_sup_esq((L,C),(L1,C1)):` verifica se o destino é a diagonal superior esquerda da posição atual.
-    *   `\+ vermelho((L1,C1)):` garante que não é um bloco mortal.
-    *   `verde((L1,C1)):` garante que o destino existe e é seguro.
-    *   `atualiza_blocos(...):` altera o estado do bloco (liga ou inverte).
+    *   `pos_destino((L,C), (L1,C1), diagonal_sup_esq): ` verifica se (L1,C1) realmente é a diagonal superior esquerda da posição (L,C).
+    *   `(verde((L1,C1)) -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1) ; ;  Blocos1 = Blocos):` Se o destino for um bloco verde (válido e seguro), atualiza o estado dos blocos. Caso contrário, mantém os blocos inalterados.
+    *   `dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]):` mostra posição inicial, final e número de movimentos restantes.
     *   `M1 is M - 1:` consome 1 movimento.
 
 *   **O QUE ACONTECE EM EXECUÇÃO:**
     *   Quando o prolog tenta provar uma jogada (`acao(mover_sup_esq, E1, E2)`), ele:
-        1.  Tenta achar `(L1,C1)` válido.
-        2.  Verifica se é verde.
-        3.  Atualiza o estado dos blocos.
-        4.  Cria um novo estado `E2` com um movimento a menos.
-        5.  Retorna esse novo estado com o resultado possível.
-
-![][image2]
+        1. Determina o destino (L1,C1) que é diagonal superior esquerda de (L,C).
+        2. Verifica se o destino é verde — se for, atualiza o tabuleiro com o novo estado do bloco.
+        3. Reduz o contador de movimentos (M1 = M - 1).
+        4. Cria o novo estado E2 (posição, blocos atualizados e movimentos restantes)
+        5. Retorna E2, permitindo que o agente continue sua sequência de ações.
 
 É assim que o Prolog “gera” os próximos estados possíveis do jogo:
 
-![][image3]
+![Colunas](imagesMD/Colunas.png)
+![Atualiza_Blocos](imagesMD/Atualiza_Blocos.png)
+![Acao_Superior](imagesMD/Acao_Superior.png)
+![Acao_Inferior](imagesMD/Acao_Inferior.png)
+
+// CORRIGIDO ATE AQUI
 
 ### REGRA DO DISCO (TELEPORTE E MODO DE PODER):
 

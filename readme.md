@@ -2,11 +2,11 @@
 
 **GRUPO:**
 
-*   Gabrielly Maria da Silva Barbosa RA: 831084
-*   José Mateus Freitas Queiroz RA: 811840
-*   Isabela de Paula Castro RA: 824145
-*   João Manoel Ribeiro Machado RA: 822447
-*   Giovanna Rabello Luciano RA: 824749
+*   Gabrielly Maria da Silva Barbosa 
+*   José Mateus Freitas Queiroz 
+*   Isabela de Paula Castro 
+*   João Manoel Ribeiro Machado 
+*   Giovanna Rabello Luciano 
 
 ---
 
@@ -43,6 +43,8 @@ O sistema de pontuação recompensa tanto ações básicas quanto estratégicas:
 ---
 
 ## 2. PEAS DO CENÁRIO
+![Cenario_Qman](imagesMD/Cenario_Qman.png)
+    
 
 ### P (Performance Measure) – Medida de Desempenho
 
@@ -108,7 +110,7 @@ O agente Q\*BERT pode perceber:
 
 ## 3. PEAS DO AGENTE
 
-![][image1]
+![Agente_Qman](imagesMD/Agente_Qman.png)
 
 ### P (Performance Measure) – Medida de Desempenho
 
@@ -180,6 +182,8 @@ O agente Q\*BERT pode perceber:
 *   **DiscoC (DC) , DiscoM (DM):** ativo/usado.
 *   **MovimentosRestantes:** número de passos (até 50).
 
+![Estrutura_Estado](imagesMD/Estrutura_Estado.png)
+
 ### Fatos Iniciais:
 
 *   Posição inicial e posições especiais.
@@ -193,7 +197,21 @@ O agente Q\*BERT pode perceber:
 *   `verde((x,y)):` são posições disponíveis para jogar.
 
 Esses dados são a base fixa do ambiente.
+
+![Pos_Inicial](imagesMD/Pos_Inicial.png)
+
+![Discos](imagesMD/Discos.png)
+
+![Pos_Inacessivel](imagesMD/Pos_Inacessivel.png)
+
+![Pos_Vermelha](imagesMD/Pos_Vermelha.png)
+
+![Pos_Verde](imagesMD/Pos_Verde.png)
+
+
 (O verde precisa ser feito para todas as posições possíveis).
+
+// CORRIGIDO ATE AQUI
 
 ### AÇÕES POSSÍVEIS:
 

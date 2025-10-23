@@ -17,12 +17,10 @@ testa_cores :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ESTADO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% mknode(+Pos, +Modo, +Blocos, +DC, +DM, +M, -Estado)
-mknode(Pos, Modo, Blocos, DC, DM, M, estado(Pos, Modo, Blocos, DC, DM, M)).
 
-estado(_PosQbert, _Modo, _Blocos, _DiscoC, _DiscoM, _MovimentosRestantes).
+estado(_PosQbert, _Modo, _Blocos, _DiscoC, _DiscoM, _MovimentosRestantes, _InimigosMortos).
 % INICIO DO JOGO
-inicio(estado((2,h), normal, [], ativo, ativo, 50)).
+inicio(estado((2,h), normal, [], ativo, ativo, 50, [])).
 
 
 resolve_unica(EstadoFinal) :-
@@ -86,9 +84,9 @@ verde((8,l)).
 verde((8,n)).
 
 % Inimigos estáticos
-%inimigo(piolho, (6,f)).
-%inimigo(teju, (4,j)).
-inimigo(teju, (100,h)).
+inimigo(piolho, (6,f)).
+inimigo(teju, (4,j)).
+inimigo(teju, (8,h)).
 inimigo(Pos) :- inimigo(_, Pos).
 
 % Posições fora do mapa
@@ -145,9 +143,8 @@ pos_destino((L,C), (L1,C1), PredDiag) :-
 
 % usar DISCO ao subir pela esquerda, quando em (5,C) e DC ativo
 acao(mover_sup_esq,
-    estado((6,d), Modo, Blocos, DC, DM, M),
-    estado((2,h), Modo1, Blocos1, DC1, DM, M1)) :-
-    dbg('cheguei aqui!', []),
+    estado((6,d), Modo, Blocos, DC, DM, M,Mortos),
+    estado((2,h), Modo1, Blocos1, DC1, DM, M1,Mortos)) :-
     (  Modo = normal
     -> Modo1 = poder
     ;  Modo1 = normal 
@@ -164,8 +161,8 @@ acao(mover_sup_esq,
 
 % usar DISCO ao subir pela direita, quando em (5,M) e DM ativo
 acao(mover_sup_dir,
-     estado((6,l), Modo, Blocos, DC, DM, M),
-     estado((2,h), Modo1, Blocos1, DC, DM1, M1)) :-
+     estado((6,l), Modo, Blocos, DC, DM, M, Mortos),
+     estado((2,h), Modo1, Blocos1, DC, DM1, M1,Mortos)) :-
     (  Modo = normal
     -> Modo1 = poder
     ;  Modo1 = normal
@@ -179,11 +176,12 @@ acao(mover_sup_dir,
     dbg('acao(mover_sup_dir/disco M): 5,m -> 2,h  M:~w->~w~n', [M,M1]).
 
 acao(mover_sup_esq, %nome da ação Geral
-    estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
-    estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
+    estado((L,C),Modo,Blocos,DC,DM,M,Mortos) , %estado atual
+    estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
     \+ ((L,C) = (6,d) ; (L,C) = (6,l)), % evita conflito com uso de disco 
     pos_destino((L,C),(L1,C1),diagonal_sup_esq),
-    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M)) -> fail ; true),
+    mata_inimigo_if_poder(Modo, (L1,C1), Mortos, Mortos), %atualiza lista de inimigos mortos se estiver em modo poder
+    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ; Blocos1 = Blocos
@@ -192,10 +190,10 @@ acao(mover_sup_esq, %nome da ação Geral
     dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 acao(mover_sup_dir,
-    estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
-    estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
+    estado((L,C),Modo,Blocos,DC,DM,M,Mortos), %estado atual
+    estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_sup_dir),
-    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M)) -> fail ; true),
+    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ; Blocos1 = Blocos
@@ -206,10 +204,10 @@ acao(mover_sup_dir,
 
 
 acao(mover_inf_esq,
-    estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
-    estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
+    estado((L,C),Modo,Blocos,DC,DM,M,Mortos), %estado atual
+    estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_inf_esq),
-    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M)) -> fail ; true),
+    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ;Blocos1 = Blocos
@@ -220,10 +218,10 @@ acao(mover_inf_esq,
 
 
 acao(mover_inf_dir,
-    estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
-    estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
+    estado((L,C),Modo,Blocos,DC,DM,M,Mortos), %estado atual
+    estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_inf_dir),
-    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M)) -> fail ; true),
+    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ;Blocos1 = Blocos
@@ -235,10 +233,10 @@ acao(mover_inf_dir,
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PERDA / VITÓRIA
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-perde(estado((L,C),_,_,_,_,_)) :- %Caso esteja num bloco vermelho então perde
+perde(estado((L,C),_,_,_,_,_,Mortos)) :-
     (   vermelho((L,C))
-    ;   inimigo((L,C)) %Caso esteja na mesma posição que um inimigo então perde
+    ;   ( inimigo((L,C)),
+          \+ member((L,C), Mortos) )
     ),
     dbg('  [perde] caiu em ~w,~w~n', [L,C]).
 
@@ -248,11 +246,9 @@ todos_ligados(Blocos) :-
     findall(P, verde(P), Verdes),
     sort(Verdes, Vs),
     sort(Blocos, Bs),
-    %dbg('  [verdes] ~w~n', [Vs]),
-    %dbg('  [blocos] ~w~n', [Bs]),
     Vs = Bs.
     
-vence(estado(_,_,Blocos,_,_,M)) :-
+vence(estado(_,_,Blocos,_,_,M,_)) :-
     todos_ligados(Blocos),
     M >= 0,
     dbg('  [vence] todos os blocos ligados com M >= 0 ~w~n', [M]).
@@ -270,17 +266,37 @@ caminho(Estado, _,Estado) :- vence(Estado).
 
 % passo recursivo: só expande se ainda tem movimentos
 caminho(Estado1,Visitados,EstadoFinal) :- %busca recursiva de caminho entre Estado1 e EstadoFinal
-    Estado1 = estado(_,_,_,_,_,M),
+    Estado1 = estado(_,_,_,_,_,M,_),
     M > 0, 
     acao(_,Estado1,Estado2), %se existe uma ação que leva do Estado1 ao Estado2
     \+ perde(Estado2), % e essa ação não causa perda
     \+ member(Estado2, Visitados),
     caminho(Estado2,[Estado2 | Visitados],EstadoFinal).%tenta recursivamente achar um caminho do Estado2 ao EstadoFinal até chegar caso base
-    
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MORTE AOS INIMIGOS E VIVA A REVOLUÇÃO
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+adiciona_morto(Pos, MortosIn, MortosOut) :-
+    (   member(Pos, MortosIn) -> MortosOut = MortosIn
+    ;   MortosOut = [Pos|MortosIn]
+    ).
+
+mata_inimigo_if_poder(Modo, Pos, MortosIn, MortosOut) :-
+    (   Modo = poder,
+        inimigo(Pos)
+    ->  adiciona_morto(Pos, MortosIn, MortosOut),
+        dbg('  [poder] inimigo em ~w removido~n', [Pos])
+    ;   MortosOut = MortosIn
+    ).
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % UTILIDADE: mostrar estado bonitinho
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-show_estado(estado((L,C),Modo,Blocos,DC,DM,M)) :-
+show_estado(estado((L,C),Modo,Blocos,DC,DM,M,_)) :-
     format('Pos: (~w,~w)  Modo: ~w  DC: ~w  DM: ~w  M: ~w~n', [L,C,Modo,DC,DM,M]),
     sort(Blocos, Bs), format('Ligados: ~w~n', [Bs]).
 

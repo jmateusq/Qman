@@ -85,9 +85,9 @@ verde((2,l)).
 verde((2,n)).
 
 % Inimigos estáticos
-%inimigo(piolho, (6,f)).
-%inimigo(teju, (4,j)).
-%inimigo(teju, (8,h)).
+inimigo(piolho, (6,f)).
+inimigo(teju, (4,j)).
+inimigo(teju, (8,h)).
 inimigo(Pos) :- inimigo(_, Pos).
 
 % Posições fora do mapa
@@ -121,6 +121,17 @@ atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
     ; BlocosOut = [Pos|BlocosIn] %senão, liga o bloco
     ),
     dbg('   [atualiza_blocos] Pos ~w -> ~w~n', [Pos, BlocosOut]).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DIAGONAIS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+diagonal_sup_esq((L,C), (L1,C1)) :- L1 is L + 1, col_esq(C, C1).
+diagonal_sup_dir((L,C), (L1,C1)) :- L1 is L + 1, col_dir(C, C1).
+diagonal_inf_esq((L,C), (L1,C1)) :- L1 is L - 1, col_esq(C, C1).
+diagonal_inf_dir((L,C), (L1,C1)) :- L1 is L - 1, col_dir(C, C1).
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -177,6 +188,7 @@ acao(mover_sup_esq, %nome da ação Geral
     M1 is M - 1,
     dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
+acao(mover_sup_dir,
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_sup_dir),

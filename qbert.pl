@@ -7,13 +7,22 @@ debug_off :- (retract(debug_flag) -> true ; true).
 
 dbg(Fmt, Args) :- (debug_flag -> format(Fmt, Args) ; true).
 
+testa_cores :-
+    forall(vermelho(P), (write('vermelho '), writeln(P))),
+    forall(verde(P),    (write('verde    '), writeln(P))),
+    forall(disco(P),    (write('disco    '), writeln(P))),
+    forall(inacessivel(P), (write('cinza    '), writeln(P))).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ESTADO
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% estado(PosQbert, Modo, Blocos, DiscoC, DiscoM, MovimentosRestantes).
+% mknode(+Pos, +Modo, +Blocos, +DC, +DM, +M, -Estado)
+mknode(Pos, Modo, Blocos, DC, DM, M, estado(Pos, Modo, Blocos, DC, DM, M)).
+
+estado(_PosQbert, _Modo, _Blocos, _DiscoC, _DiscoM, _MovimentosRestantes).
 % INICIO DO JOGO
-inicio(estado((8,h), normal, [], ativo, ativo, 50)).
+inicio(estado((2,h), normal, [], ativo, ativo, 50)).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -73,9 +82,9 @@ verde((8,l)).
 verde((8,n)).
 
 % Inimigos estáticos
-inimigo(piolho, (6,f)).
-inimigo(teju, (4,j)).
-inimigo(teju, (8,h)).
+%inimigo(piolho, (6,f)).
+%inimigo(teju, (4,j)).
+%inimigo(teju, (8,h)).
 inimigo(Pos) :- inimigo(_, Pos).
 
 % Posições fora do mapa
@@ -107,7 +116,7 @@ diagonal_inf_dir((L,C), (L1,C1)) :- L1 is L + 1, col_dir(C, C1).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ATUALIZAÇÃO DE BLOCOS (liga idempotente; só mexe em Blocos)
+% ATUALIZAÇÃO DE BLOCOS (só mexe em Blocos)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % atualiza_blocos(+Modo, +Pos, +BlocosIn, -BlocosOut) (+:conhecido; -:retornado)
 % (Modo por enquanto não altera a regra)
@@ -116,7 +125,7 @@ atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
     -> BlocosOut = BlocosIn
     ; BlocosOut = [Pos|BlocosIn] %senão, liga o bloco
     ),
-    dbg('[atualiza_blocos] Pos ~w -> ~w~n', [Pos, BlocosOut]).
+    dbg('   [atualiza_blocos] Pos ~w -> ~w~n', [Pos, BlocosOut]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -127,84 +136,129 @@ pos_destino((L,C), (L1,C1), PredDiag) :-
     call(PredDiag, (L,C), (L1,C1)),
     \+ inacessivel((L1,C1)).
 
+% usar DISCO ao subir pela esquerda, quando em (5,c) e DC ativo
+acao(mover_sup_esq,
+     estado((6,d), Modo, Blocos, ativo, DM, M),
+     estado((2,h), Modo1, Blocos1, usado, DM, M1)) :-
+    (  Modo = normal
+    -> Modo1 = poder
+    ;  Modo1 = normal
+    ),
+    atualiza_blocos(Modo,(2,h),Blocos,Blocos1),
+    M1 is M - 1,
+    dbg('acao(mover_sup_esq/disco C): 5,c -> 2,h  M:~w->~w~n', [M,M1]).
+
+
+% usar DISCO ao subir pela direita, quando em (5,m) e DM ativo
+acao(mover_sup_dir,
+     estado((6,l), Modo, Blocos, DC, ativo, M),
+     estado((2,h), Modo1, Blocos1, DC, usado, M1)) :-
+    (  Modo = normal
+    -> Modo1 = poder
+    ;  Modo1 = normal
+    ),
+    atualiza_blocos(Modo,(2,h),Blocos,Blocos1),
+    M1 is M - 1,
+    dbg('acao(mover_sup_dir/disco M): 5,m -> 2,h  M:~w->~w~n', [M,M1]).
+
 acao(mover_sup_esq, %nome da ação
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
+    \+ ((L,C) = (6,d) ; (L,C) = (6,l)), % evita conflito com uso de disco
     pos_destino((L,C),(L1,C1),diagonal_sup_esq),
     (  verde((L1,C1))
-    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1),
-    ;Blocos1 = Blocos
+    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
+    ; Blocos1 = Blocos
     ),
-    M1 is M - 1.
+    M1 is M - 1,
     dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 
 acao(mover_sup_dir,
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
-    diagonal_sup_dir((L,C),(L1,C1)),
+    pos_destino((L,C),(L1,C1),diagonal_sup_dir),
     (  verde((L1,C1))
-    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1),
-    ;Blocos1 = Blocos
+    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
+    ; Blocos1 = Blocos
     ),
     %contagem de movimentos independe de ter alterado bloco ou nao
-    M1 is M - 1.
+    M1 is M - 1,
+    dbg('acao(mover_sup_dir): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 
-% movimento diagonal inferior esquerda
-diagonal_inf_esq((L,C), (L1,C1)) :-
-    L1 is L - 1,
-    C1 is C - 1.
 acao(mover_inf_esq,
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
-    diagonal_inf_esq((L,C),(L1,C1)),
+    pos_destino((L,C),(L1,C1),diagonal_inf_esq),
     (  verde((L1,C1))
-    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1),
+    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ;Blocos1 = Blocos
     ),
     %contagem de movimentos independe de ter alterado bloco ou nao
-    M1 is M - 1.
+    M1 is M - 1,
+    dbg('acao(mover_inf_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
-% movimento diagonal inferior direita
-diagonal_inf_dir((L,C), (L1,C1)) :-
-    L1 is L - 1,
-    C1 is C + 1.
+
 acao(mover_inf_dir,
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
-    diagonal_inf_dir((L,C),(L1,C1)),
+    pos_destino((L,C),(L1,C1),diagonal_inf_dir),
     (  verde((L1,C1))
-    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1),
+    -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ;Blocos1 = Blocos
     ),
     %contagem de movimentos independe de ter alterado bloco ou nao
-    M1 is M - 1.
-
-acao(usardisco,
-    estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
-    estado((9,h),poder,Blocos,DC1,DM1,M1)) :- %estado resultante
-    ((L,C) = (5,c), DC = ativo, DC1 = usado, DM1 = DM; % Se o DC está ativo e pos valida ele é usado
-     (L,C) = (5,m), DM = ativo, DM1 = usado, DC1 = DC),% Se o DM está ativo e pos valida ele é usado
-    M1 is M - 1. % Só atualiza se o movimento se concretiza
+    M1 is M - 1,
+    dbg('acao(mover_inf_dir): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PERDA / VITÓRIA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 perde(estado((L,C),_,_,_,_,_)) :- %Caso esteja num bloco vermelho então perde
-    vermelho((L,C)).
+    (    vermelho((L,C))
+    ;   inimigo((L,C)) %Caso esteja na mesma posição que um inimigo então perde
+    ),
+    dbg('  [perde] caiu em ~w,~w~n', [L,C]).
+
+
+% vitória: todas as verdes ligadas e M >= 0
+todos_ligados(Blocos) :-
+    findall(P, verde(P), Verdes),
+    sort(Verdes, Vs),
+    sort(Blocos, Bs),
+    dbg('  [verdes] ~w~n', [Vs]),
+    dbg('  [blocos] ~w~n', [Bs]),
+    Vs = Bs.
     
-vence(estado(_,_,Blocos,_,_,M)) :- %se todos os blocos estão ligados e ainda tem movimentos ganhamos
+vence(estado(_,_,Blocos,_,_,M)) :-
     todos_ligados(Blocos),
-    M >= 0.
-    
+    M >= 0,
+    dbg('  [vence] todos os blocos ligados com M >= 0 ~w~n', [M]).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BUSCA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 consegue(EstadoFinal) :- %tenta achar algum EstadoFinal que seja vencedor partindo do EstadoInicial
     inicio(EstadoInicial),
     caminho(EstadoInicial,EstadoFinal).
 
-caminho(Estado,Estado) :- vence(Estado). %caso base: se o estado atual é vencedor, então o caminho termina aqui
+%caso base: se o estado atual é vencedor, então o caminho termina aqui
+caminho(Estado,Estado) :- vence(Estado). 
+
+% passo recursivo: só expande se ainda tem movimentos
 caminho(Estado1,EstadoFinal) :- %busca recursiva de caminho entre Estado1 e EstadoFinal
     acao(_,Estado1,Estado2), %se existe uma ação que leva do Estado1 ao Estado2
     \+ perde(Estado2), % e essa ação não causa perda
     caminho(Estado2,EstadoFinal).%tenta recursivamente achar um caminho do Estado2 ao EstadoFinal até chegar caso base
     
-?- consegue(estado(_,_,_,_,_,_)).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% UTILIDADE: mostrar estado bonitinho
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+show_estado(estado((L,C),Modo,Blocos,DC,DM,M)) :-
+    format('Pos: (~w,~w)  Modo: ~w  DC: ~w  DM: ~w  M: ~w~n', [L,C,Modo,DC,DM,M]),
+    sort(Blocos, Bs), format('Ligados: ~w~n', [Bs]).
+
 

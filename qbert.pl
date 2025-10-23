@@ -269,25 +269,28 @@ vence(estado(_,_,Blocos,_,_,M,_)) :-
     M >= 0,
     dbg('  [vence] todos os blocos ligados com M >= 0 ~w~n', [M]).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BUSCA (revisada)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% BUSCA
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-consegue(EstadoFinal) :- %tenta achar algum EstadoFinal que seja vencedor partindo do EstadoInicial
+% Resolve encontrando um estado final vitorioso a partir do estado inicial
+consegue(EstadoFinal) :-
     inicio(EstadoInicial),
-    caminho(EstadoInicial, [EstadoInicial],EstadoFinal).
+    caminho(EstadoInicial, [EstadoInicial], EstadoFinal).
 
-%caso base: se o estado atual é vencedor, então o caminho termina aqui
-caminho(Estado, _,Estado) :- vence(Estado). 
+% Caso base: chegou num estado vencedor
+caminho(Estado, _, Estado) :-
+    vence(Estado),
+    !.  % corta aqui — evita continuar procurando outras soluções redundantes
 
-% passo recursivo: só expande se ainda tem movimentos
-caminho(Estado1,Visitados,EstadoFinal) :- %busca recursiva de caminho entre Estado1 e EstadoFinal
+% Passo recursivo: busca em profundidade
+caminho(Estado1, Visitados, EstadoFinal) :-
     Estado1 = estado(_,_,_,_,_,M,_),
-    M > 0, 
-    acao(_,Estado1,Estado2), %se existe uma ação que leva do Estado1 ao Estado2
-    \+ perde(Estado2), % e essa ação não causa perda
-    \+ member(Estado2, Visitados),
-    caminho(Estado2,[Estado2 | Visitados],EstadoFinal).%tenta recursivamente achar um caminho do Estado2 ao EstadoFinal até chegar caso base
+    M > 0,  % ainda há movimentos disponíveis
+    acao(_, Estado1, Estado2),  % gera próximo estado possível
+    \+ member(Estado2, Visitados),  % evita ciclos
+    \+ perde(Estado2),  % não entra em estados perdedores
+    caminho(Estado2, [Estado2 | Visitados], EstadoFinal).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

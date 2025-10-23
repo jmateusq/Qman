@@ -87,7 +87,7 @@ verde((2,n)).
 % Inimigos estáticos
 %inimigo(piolho, (6,f)).
 %inimigo(teju, (4,j)).
-inimigo(teju, (100,h)).
+%inimigo(teju, (8,h)).
 inimigo(Pos) :- inimigo(_, Pos).
 
 % Posições fora do mapa
@@ -137,7 +137,7 @@ acao(mover_sup_esq,
      estado((2,h), Modo1, Blocos1, DC1, DM, M1)) :-
     (  Modo = normal
     -> Modo1 = poder
-    ;  Modo1 = normal
+    ;  Modo1 = normal 
     ),
     (   DC = normal
     ->  DC1 = usado
@@ -177,16 +177,6 @@ acao(mover_sup_esq, %nome da ação Geral
     M1 is M - 1,
     dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
-
-<<<<<<< Updated upstream
-% movimento diagonal superior direita
-diagonal_sup_dir((L,C), (L1,C1)) :-
-    L1 is L + 1,
-    C1 is C + 1.
-acao(mover_sup_dir,
-=======
-acao(mover_sup_dir,%GERAL  
->>>>>>> Stashed changes
     estado((L,C),Modo,Blocos,DC,DM,M), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_sup_dir),

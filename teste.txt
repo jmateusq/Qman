@@ -1,0 +1,144 @@
+# Para rodar o teste
+?- debug_on.
+# a resposta deve ser true
+
+# depois coloque o seguinte caso
+acao(mover_sup_esq,E4,E5),
+acao(mover_inf_dir,E5,E6),
+acao(mover_inf_dir,E6,E7),
+acao(mover_inf_dir,E7,E8),
+acao(mover_inf_dir,E8,E9),
+acao(mover_sup_dir,E9,E10),
+acao(mover_inf_dir,E10,E11),
+acao(mover_inf_esq,E11,E12),
+acao(mover_inf_dir,E12,E13),
+acao(mover_inf_dir,E13,E14),
+acao(mover_inf_dir,E14,E15),
+acao(mover_sup_dir,E15,E16),
+acao(mover_inf_dir,E16,E17),
+acao(mover_inf_dir,E17,E18),
+acao(mover_sup_esq,E18,E20),
+acao(mover_inf_esq,E20,E22),
+acao(mover_sup_esq,E22,E24),
+acao(mover_inf_esq,E24,E25),
+acao(mover_sup_esq,E25,E26),
+acao(mover_sup_esq,E26,E27),
+acao(mover_sup_esq,E27,E28),
+acao(mover_inf_esq,E28,E30),
+acao(mover_inf_dir,E30,E32),
+acao(mover_inf_dir,E32,E33),
+acao(mover_sup_esq,E33,E34),
+acao(mover_inf_esq,E34,E35),
+acao(mover_sup_esq,E35,E36),
+acao(mover_inf_esq,E36,E37),
+acao(mover_sup_esq,E37,E38),
+acao(mover_inf_esq,E38,E39),
+vence(E39).
+
+#com a esperada resposta
+   [atualiza_blocos] Pos 3,g -> [(3,g)]
+acao(mover_inf_esq): 2,h -> 3,g  M:50->49
+   [atualiza_blocos] Pos 4,f -> [(4,f),(3,g)]
+acao(mover_inf_esq): 3,g -> 4,f  M:49->48
+   [atualiza_blocos] Pos 5,e -> [(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 4,f -> 5,e  M:48->47
+   [atualiza_blocos] Pos 6,d -> [(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 5,e -> 6,d  M:47->46
+   [atualiza_blocos] Pos 2,h -> [(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq/disco C): 5,c -> 2,h  M:46->45
+   [atualiza_blocos] Pos 3,i -> [(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 2,h -> 3,i  M:45->44
+   [atualiza_blocos] Pos 4,j -> [(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 3,i -> 4,j  M:44->43
+   [atualiza_blocos] Pos 5,k -> [(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 4,j -> 5,k  M:43->42
+   [atualiza_blocos] Pos 6,l -> [(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 5,k -> 6,l  M:42->41
+   [atualiza_blocos] Pos 2,h -> [(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_dir/disco M): 5,m -> 2,h  M:41->40
+   [atualiza_blocos] Pos 3,i -> [(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 2,h -> 3,i  M:40->39
+   [atualiza_blocos] Pos 4,h -> [(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 3,i -> 4,h  M:39->38
+   [atualiza_blocos] Pos 5,i -> [(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 4,h -> 5,i  M:38->37
+   [atualiza_blocos] Pos 6,j -> [(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 5,i -> 6,j  M:37->36
+   [atualiza_blocos] Pos 7,k -> [(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 6,j -> 7,k  M:36->35
+   [atualiza_blocos] Pos 6,l -> [(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_dir): 7,k -> 6,l  M:35->34
+   [atualiza_blocos] Pos 7,m -> [(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 6,l -> 7,m  M:34->33
+   [atualiza_blocos] Pos 8,n -> [(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 7,m -> 8,n  M:33->32
+   [atualiza_blocos] Pos 7,m -> [(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 8,n -> 7,m  M:32->31
+   [atualiza_blocos] Pos 8,l -> [(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 7,m -> 8,l  M:31->30
+   [atualiza_blocos] Pos 7,k -> [(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 8,l -> 7,k  M:30->29
+   [atualiza_blocos] Pos 8,j -> [(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 7,k -> 8,j  M:29->28
+   [atualiza_blocos] Pos 7,i -> [(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 8,j -> 7,i  M:28->27
+   [atualiza_blocos] Pos 6,h -> [(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 7,i -> 6,h  M:27->26
+   [atualiza_blocos] Pos 5,g -> [(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 6,h -> 5,g  M:26->25
+   [atualiza_blocos] Pos 6,f -> [(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 5,g -> 6,f  M:25->24
+   [atualiza_blocos] Pos 7,g -> [(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 6,f -> 7,g  M:24->23
+   [atualiza_blocos] Pos 8,h -> [(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_dir): 7,g -> 8,h  M:23->22
+   [atualiza_blocos] Pos 7,g -> [(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 8,h -> 7,g  M:22->21
+   [atualiza_blocos] Pos 8,f -> [(8,f),(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 7,g -> 8,f  M:21->20
+   [atualiza_blocos] Pos 7,e -> [(7,e),(8,f),(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 8,f -> 7,e  M:20->19
+   [atualiza_blocos] Pos 8,d -> [(8,d),(7,e),(8,f),(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 7,e -> 8,d  M:19->18
+   [atualiza_blocos] Pos 7,c -> [(7,c),(8,d),(7,e),(8,f),(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_sup_esq): 8,d -> 7,c  M:18->17
+   [atualiza_blocos] Pos 8,b -> [(8,b),(7,c),(8,d),(7,e),(8,f),(8,h),(7,g),(6,f),(5,g),(6,h),(7,i),(8,j),(8,l),(8,n),(7,m),(7,k),(6,j),(5,i),(4,h),(6,l),(5,k),(4,j),(3,i),(2,h),(6,d),(5,e),(4,f),(3,g)]
+acao(mover_inf_esq): 7,c -> 8,b  M:17->16
+  [verdes] [(2,h),(3,g),(3,i),(4,f),(4,h),(4,j),(5,e),(5,g),(5,i),(5,k),(6,d),(6,f),(6,h),(6,j),(6,l),(7,c),(7,e),(7,g),(7,i),(7,k),(7,m),(8,b),(8,d),(8,f),(8,h),(8,j),(8,l),(8,n)]
+  [blocos] [(2,h),(3,g),(3,i),(4,f),(4,h),(4,j),(5,e),(5,g),(5,i),(5,k),(6,d),(6,f),(6,h),(6,j),(6,l),(7,c),(7,e),(7,g),(7,i),(7,k),(7,m),(8,b),(8,d),(8,f),(8,h),(8,j),(8,l),(8,n)]
+  [vence] todos os blocos ligados com M >= 0 16
+E0 = estado((2, h), normal, [], ativo, ativo, 50),
+E1 = estado((3, g), normal, [(3, g)], ativo, ativo, 49),
+E2 = estado((4, f), normal, [(4, f), (3, g)], ativo, ativo, 48),
+E3 = estado((5, e), normal, [(5, e), (4, f), (3, g)], ativo, ativo, 47),
+E4 = estado((6, d), normal, [(6, d), (5, e), (4, f), (3, g)], ativo, ativo, 46),
+E5 = estado((2, h), poder, [(2, h), (6, d), (5, e), (4, f), (3, g)], usado, ativo, 45),
+E6 = estado((3, i), poder, [(3, i), (2, h), (6, d), (5, e), (4, f), (3, g)], usado, ativo, 44),
+E7 = estado((4, j), poder, [(4, j), (3, i), (2, h), (6, d), (5, e), (4, f), (3, g)], usado, ativo, 43),
+E8 = estado((5, k), poder, [(5, k), (4, j), (3, i), (2, h), (6, d), (5, e), (4, f), (..., ...)], usado, ativo, 42),
+E9 = estado((6, l), poder, [(6, l), (5, k), (4, j), (3, i), (2, h), (6, d), (5, e), (..., ...)|...], usado, ativo, 41),
+E10 = estado((2, h), normal, [(6, l), (5, k), (4, j), (3, i), (2, h), (6, d), (5, e), (..., ...)|...], usado, usado, 40),
+E11 = estado((3, i), normal, [(6, l), (5, k), (4, j), (3, i), (2, h), (6, d), (5, e), (..., ...)|...], usado, usado, 39),
+E12 = estado((4, h), normal, [(4, h), (6, l), (5, k), (4, j), (3, i), (2, h), (6, d), (..., ...)|...], usado, usado, 38),
+E13 = estado((5, i), normal, [(5, i), (4, h), (6, l), (5, k), (4, j), (3, i), (2, h), (..., ...)|...], usado, usado, 37),
+E14 = estado((6, j), normal, [(6, j), (5, i), (4, h), (6, l), (5, k), (4, j), (3, i), (..., ...)|...], usado, usado, 36),
+E15 = estado((7, k), normal, [(7, k), (6, j), (5, i), (4, h), (6, l), (5, k), (4, j), (..., ...)|...], usado, usado, 35),
+E16 = estado((6, l), normal, [(7, k), (6, j), (5, i), (4, h), (6, l), (5, k), (4, j), (..., ...)|...], usado, usado, 34),
+E17 = estado((7, m), normal, [(7, m), (7, k), (6, j), (5, i), (4, h), (6, l), (5, k), (..., ...)|...], usado, usado, 33),
+E18 = estado((8, n), normal, [(8, n), (7, m), (7, k), (6, j), (5, i), (4, h), (6, l), (..., ...)|...], usado, usado, 32),
+E20 = estado((7, m), normal, [(8, n), (7, m), (7, k), (6, j), (5, i), (4, h), (6, l), (..., ...)|...], usado, usado, 31),
+E22 = estado((8, l), normal, [(8, l), (8, n), (7, m), (7, k), (6, j), (5, i), (4, h), (..., ...)|...], usado, usado, 30),
+E24 = estado((7, k), normal, [(8, l), (8, n), (7, m), (7, k), (6, j), (5, i), (4, h), (..., ...)|...], usado, usado, 29),
+E25 = estado((8, j), normal, [(8, j), (8, l), (8, n), (7, m), (7, k), (6, j), (5, i), (..., ...)|...], usado, usado, 28),
+E26 = estado((7, i), normal, [(7, i), (8, j), (8, l), (8, n), (7, m), (7, k), (6, j), (..., ...)|...], usado, usado, 27),
+E27 = estado((6, h), normal, [(6, h), (7, i), (8, j), (8, l), (8, n), (7, m), (7, k), (..., ...)|...], usado, usado, 26),
+E28 = estado((5, g), normal, [(5, g), (6, h), (7, i), (8, j), (8, l), (8, n), (7, m), (..., ...)|...], usado, usado, 25),
+E30 = estado((6, f), normal, [(6, f), (5, g), (6, h), (7, i), (8, j), (8, l), (8, n), (..., ...)|...], usado, usado, 24),
+E32 = estado((7, g), normal, [(7, g), (6, f), (5, g), (6, h), (7, i), (8, j), (8, l), (..., ...)|...], usado, usado, 23),
+E33 = estado((8, h), normal, [(8, h), (7, g), (6, f), (5, g), (6, h), (7, i), (8, j), (..., ...)|...], usado, usado, 22),
+E34 = estado((7, g), normal, [(8, h), (7, g), (6, f), (5, g), (6, h), (7, i), (8, j), (..., ...)|...], usado, usado, 21),
+E35 = estado((8, f), normal, [(8, f), (8, h), (7, g), (6, f), (5, g), (6, h), (7, i), (..., ...)|...], usado, usado, 20),
+E36 = estado((7, e), normal, [(7, e), (8, f), (8, h), (7, g), (6, f), (5, g), (6, h), (..., ...)|...], usado, usado, 19),
+E37 = estado((8, d), normal, [(8, d), (7, e), (8, f), (8, h), (7, g), (6, f), (5, g), (..., ...)|...], usado, usado, 18),
+E38 = estado((7, c), normal, [(7, c), (8, d), (7, e), (8, f), (8, h), (7, g), (6, f), (..., ...)|...], usado, usado, 17),
+E39 = estado((8, b), normal, [(8, b), (7, c), (8, d), (7, e), (8, f), (8, h), (7, g), (..., ...)|...], usado, usado, 16) 

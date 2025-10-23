@@ -173,7 +173,7 @@ O agente Q\*BERT pode perceber:
 
 ## 4. REGRAS
 
-### ESTRUTURA DE ESTADOS:
+# ESTRUTURA DE ESTADOS:
 
 *   **PosQBert:** posição do agente `(2,H)`.
 *   **Modo:** normal | poder | finalizado.
@@ -181,7 +181,7 @@ O agente Q\*BERT pode perceber:
 *   **DiscoC (DC) , DiscoM (DM):** ativo/usado.
 *   **MovimentosRestantes:** número de passos (até 50).
 
-### Fatos Iniciais:
+# Fatos Iniciais:
 
 *   Posição inicial e posições especiais.
     *   **(2,H):** Posição inicial.
@@ -205,9 +205,7 @@ Esses dados são a base fixa do ambiente.
 
 (O verde precisa ser feito para todas as posições possíveis).
 
-// CORRIGIDO ATE AQUI
-
-### AÇÕES POSSÍVEIS:
+# AÇÕES POSSÍVEIS:
 
 São os movimentos que o agente pode realizar.
 
@@ -222,11 +220,11 @@ São os movimentos que o agente pode realizar.
 
 *   **O QUE ACONTECE EM EXECUÇÃO:**
     *   Quando o prolog tenta provar uma jogada (`acao(mover_sup_esq, E1, E2)`), ele:
-        1. Determina o destino (L1,C1) que é diagonal superior esquerda de (L,C).
-        2. Verifica se o destino é verde — se for, atualiza o tabuleiro com o novo estado do bloco.
-        3. Reduz o contador de movimentos (M1 = M - 1).
-        4. Cria o novo estado E2 (posição, blocos atualizados e movimentos restantes)
-        5. Retorna E2, permitindo que o agente continue sua sequência de ações.
+1. Determina o destino (L1,C1) que é diagonal superior esquerda de (L,C).
+2. Verifica se o destino é verde — se for, atualiza o tabuleiro com o novo estado do bloco.
+3. Reduz o contador de movimentos (M1 = M - 1).
+4. Cria o novo estado E2 (posição, blocos atualizados e movimentos restantes)
+5. Retorna E2, permitindo que o agente continue sua sequência de ações.
 
 É assim que o Prolog “gera” os próximos estados possíveis do jogo:
 
@@ -235,64 +233,181 @@ São os movimentos que o agente pode realizar.
 ![Acao_Superior](imagesMD/Acao_Superior.png)
 ![Acao_Inferior](imagesMD/Acao_Inferior.png)
 
-// CORRIGIDO ATE AQUI
-
-### REGRA DO DISCO (TELEPORTE E MODO DE PODER):
+---
+# REGRA DO DISCO (TELEPORTE E MODO DE PODER):
 
 Define o que acontece quando Q\*BERT pisa num disco:
 
-*   Se ele estiver em `(5,c)` e o disco estiver ativo, ele:
-    *   é **teletransportado** para o topo `(9,h)`.
+*   Se ele estiver em `(5,C)` e o disco estiver ativo, ele:
+    *   é **teletransportado** para o topo `(2,H)`.
     *   muda o modo para `poder` (agora ele pode matar inimigos).
-    *   o disco `(5,c)` passa a estar `usado`.
+    *   o disco `(5,C)` passa a estar `usado`.
 
-O ponto e vírgula (`;`) significa **“ou”**, então vale para `(5,c)` ou `(5,m)`.
+O ponto e vírgula (`;`) significa **“ou”**, então vale para `(5,C)` ou `(5,M)`.
 
-![][image4]
+![Acao_Disco](imagesMD/Acao_Disco.png)
+*   **Cabeça:**
+    *   `acao(mover_sup_, EstadoAntes, EstadoDepois)`
+    *   “Existe uma ação chamada usardisco que transforma o estado atual (EstadoAntes) no estado resultante (EstadoDepois)."
+*   **Corpo ( pós `:-`):**
+    *   `((L,C) = (5,C), DC = ativo, DC1 = usado, DM1 = DM:` Se o agente está na posição (5,C) e o disco de cor (DC) está ativo, ele é usado. O disco de matar (DM) permanece no mesmo estado.
+    *   `((L,C) = (5,M), DM = ativo, DM1 = usado, DC1 = DC):` Se o agente está na posição (5,M) e o disco de matar (DM) está ativo, ele é usado (vira “usado”). O disco de cor (DC) permanece no mesmo estado.
+    *   `(Modo = normal -> Modo1 = poder ; Modo1 = normal ):` O modo alterna entre normal e poder, dependendo do estado atual.
+    *   `dbg('acao(usardisco_esq/disco C): 5,c -> 5,c  M:~w->~w', [M,M1]):` Mostra no console a ação realizada e a variação no número de movimentos.
+    *   `M1 is M - 1:`reduz o número de movimentos.
 
-### CONDIÇÃO DE DERROTA (LIMBO):
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+    *   Quando o Prolog tenta provar uma jogada acao(usardisco,E1,E2), ele:
+1. Verifica a posição atual (L,C) do agente.
+2. Se estiver em (5,C) com DC ativo, usa o disco de cor.
+3. Se estiver em (5,M) com DM ativo, usa o disco de matar.
+4. Atualiza o modo para poder e mantém os blocos.
+5. Reduz o contador de movimentos: M1 = M - 1.
+6. Define o novo estado E2.
 
-É uma regra simples para detectar uma derrota:
+---
+# MODO PODER E BLOCOS:
+Essa regra atualiza o estado do jogo, removendo o bloco clicável da posição atual quando o agente está em modo poder.
 
-*   **“Se a posição atual é um bloco vermelho, o jogador perdeu”:**
-    *   O underline (`_`) significa “não importa o que tem aqui”.
-    *   Então só a posição é verificada.
+![Atualiza_Blocos_Clicavel](imagesMD/Atualiza_Blocos_Clicavel.png)
 
-Isso serve para o prolog não ficar testando movimentos inválidos.
+*   **Cabeça:**
+    *   `acao(remover_blocos_poder, estado((L,C), poder, Blocos, DC, DM, M), estado((L,C), poder, Blocos1, DC, DM, M1)).`
+*   **Corpo ( pós `:-`):**
+    *   `member((L,C), Blocos):` verifica se a posição atual (L,C) está na lista de blocos clicados.
+    *  `delete(Blocos, (L,C), Blocos1):` se estiver, remove o bloco da lista. Caso não esteja, mantém os blocos inalterados (Blocos1 = Blocos).
+    *   `M1 is M - 1:`reduz o número de movimentos.
 
-![][image5]
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+    *   Quando o agente Q*BERT chega num bloco enquanto está com poder ativo, o jogo:
+1. Verifica se o bloco está na lista de blocos clicados.
+2. Se estiver, remove da lista — o bloco deixa de ser clicável.
+3. Mantém o modo poder ativo.
+4. Diminui 1 movimento restante.
 
-### CONDIÇÃO DE VITÓRIA:
+---
+# MODO PODER E INIMIGOS:
+
+A ação matar_inimigo define o comportamento quando o agente está em modo poder e encosta em um inimigo — o inimigo é removido.
+
+*   **Cabeça:**
+    *   `acao(matar_inimigo,estado((L,C), poder, Blocos, DC, DM, M),estado((L,C), poder, Blocos, DC, DM, M1)).`
+*   **Corpo ( pós `:-`):**
+    * `inimigo((L,C)):` verifica se há um inimigo na posição do agente.
+    * `remover_inimigo((L,C)):` se houver, remove o inimigo da lista de inimigos ativos.
+    * `M1 is M - 1:` reduz o número de movimentos.
+
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+1. O Q*BERT se move até uma posição. Se estiver em modo poder e houver um inimigo nessa posição: O inimigo é removido do cenário.
+2. O agente continua em modo poder.
+3. Um movimento é consumido (M1 = M - 1).
+
+---
+# COLISÃO COM INIMIGOS:
+A ação colisao_inimigo define o que acontece quando o Q*BERT encosta em um inimigo sem estar em modo poder.
+
+![Cenario_Inimigos](imagesMD/Cenario_Inimigos.png)
+
+![Código_Cenário_Inimigos](imagesMD/Código_Cenário_Inimigos.png)
+
+*   **Cabeça:**
+    * `acao(colisao_inimigo,estado((L,C), Modo, Blocos, DC, DM, M),estado(morte, Modo, Blocos, DC, DM, M)):` A ação colisao_inimigo define o que acontece quando o Q*bert encosta em um inimigo sem estar em modo poder
+
+*   **Corpo ( pós `:-`):**
+    * `inimigo((L,C)):` verifica se existe um inimigo na posição atual do agente.
+    * Se sim, o agente entra no estado de morte — indicando o fim da partida ou perda de vida.
+    * `M1 is M - 1:` reduz o número de movimentos.
+
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+1. Verifica se a posição (L,C) contém um inimigo.
+2. Se sim, o estado resultante passa a ser morte.
+3. Caso contrário, a ação falha (ou outra ação é avaliada).
+
+---
+# CONDIÇÃO DE DERROTA:
+A ação perde define as condições em que o agente é derrotado — seja por cair em um bloco vermelho ou por colidir com um inimigo na mesma posição.
+
+*   **Cabeça:**
+    * `acao(perde, estado((L,C),Modo,Blocos,DC,DM,M), estado(morte,Modo,Blocos,DC,DM,M))`.
+*   **Corpo ( pós `:-`):**
+    * `vermelho((L,C)):` Se a posição (L,C) for um bloco vermelho, o agente perde.
+    * `inimigo((L,C)):` Se houver um inimigo na posição (L,C), o agente também perde.
+    * `dbg('[perde] caiu em ~w-~w~n', [L,C]):` Após detectar a perda, imprime uma mensagem de depuração indicando a posição em que ocorreu.
+
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+1. Ele verifica se a posição atual (L,C) é vermelha ou se existe um inimigo nessa mesma posição.
+2. Caso qualquer uma dessas condições seja verdadeira, o estado resultante é alterado para morte, representando o fim da partida ou a perda de uma vida.
+3. Se nenhuma condição for satisfeita, a ação falha (isto é, o agente não perde).
+
+![Perde](imagesMD/Perde.png)
+
+---
+# CONDIÇÃO DE VITÓRIA:
 
 Essa é a regra do fim do jogo com vitória:
 
 *   Ela é verdadeira quando:
-    *   **Todos os blocos verdes estão “LIGADOS” (`todos_ligados(Blocos)` = todos = 1).**
-    *   **Ainda restam movimentos (`M >= 0`).**
 
-![][image6]
+    *   `todos_ligados:` coleta todas as posições verdes via verde(lista), ordena e compara com os blocos atualmente ligados (Blocos). Vence se os conjuntos forem iguais.
+    *   `M >= 0:` ainda restam movimentos (ou exatamente zero), então a vitória é válida.
 
-### REGRA RECURSIVA (JOGABILIDADE COMPLETA):
+![Todos_Ligados](imagesMD/Todos_Ligados.png)
+---
+# REGRA RECURSIVA (JOGABILIDADE COMPLETA):
 
 Essas três regras fazem o motor do jogo lógico, igual o exemplo do “macaco e a banana” apresentados na aula de inteligência artificial ministrada pelo professor **Murilo Coelho Naldi.**
 
-*   `consegue(EstadoFinal)`
-    *   **COMEÇA O JOGO:** diz ao Prolog para partir do estado inicial e buscar um estado final vencedor.
-*   `caminho(Estado,Estado)`
-    *   **CASO BASE:** se o estado atual já é vencedor (`vence(Estado)`), para a busca.
-*   `caminho(Estado1,EstadoFinal)`
-    *   **CASO RECURSIVO:**
-        *   Tenta achar uma ação (`acao(_,Estado1,Estado2)`) que leve a outro estado.
-        *   Garante que esse novo estado não seja derrota (`\+ perde(Estado2)`).
-        *   Continua buscando (`caminho(Estado2,EstadoFinal)`).
+*   **Cabeça:**
+    * `consegue(EstadoFinal):` Tenta encontrar algum EstadoFinal vencedor partindo do estado inicial definido por inicio/1.
 
-O Prolog usa backtracking, ou seja, se uma sequência de ações não leva à vitória, ele volta e tenta outro caminho automaticamente.
+*   **Corpo ( pós `:-`):**
+    * `inicio(EstadoInicial):` Obtém EstadoInicial com inicio/1.
+    * `caminho(EstadoInicial, [EstadoInicial], EstadoFinal):` Inicia a busca chamando caminho/3 com a lista de visitados contendo apenas o estado inicial.
 
-![][image7]
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+1. Gera o estado inicial e dispara a busca em profundidade a   partir dele.
+2. Se caminho/3 conseguir provar algum estado vencedor, esse é unificado em EstadoFinal.
+3. Em caso de falha, o Prolog retrocede (backtracking) para tentar outras possibilidades de caminho/ações.
+
+![Consegue](imagesMD/Consegue.png)
+
+### CASO BASE
+Regra que encerra a busca quando o estado atual já é vencedor.
+
+*   **Cabeça:**
+    * `caminho(Estado, _, Estado)` 
+
+*   **Corpo ( pós `:-`):**
+    * `vence(Estado):` Verifica se Estado satisfaz a condição de vitória.
+
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+1. Ao alcançar um Estado que cumpre vence/1, a recursão termina com sucesso.
+2. O segundo argumento (lista de visitados) é ignorado aqui, pois não afeta a condição de vitória.
+
+![Caminho](imagesMD/Caminho.png)
+
+
+### PASSO RECURSIVO
+Expande o estado atual gerando sucessores por meio de ações, respeitando limites e evitando repetição de estados.
+
+*   **Cabeça:**
+    * `caminho(Estado1, Visitados, EstadoFinal) `.
+*   **Corpo ( pós `:-`):**
+    * `Estado1 = estado(_,_,_,_,_,M), M > 0:` garante que o limite M seja positivo antes de expandir.
+    * `acao(_, Estado1, Estado2):` usa acao/3 (não determinística) para gerar possíveis próximos estados.
+    * `\+ perde(Estado2):` retira estados perdedores.
+    * `\+ member(Estado2, Visitados):` evita laços com a checagem na lista Visitados.
+    * `caminho(Estado2, [Estado2 | Visitados], EstadoFinal):` prossegue recursivamente a partir de Estado2, registrando-o como visitado.
+
+*   **O QUE ACONTECE EM EXECUÇÃO:**
+1. Implementa busca em profundidade com limite (controlado por M). 
+2. Para cada ação possível a partir de Estado1, tenta continuar o caminho - se falhar, o Prolog retrocede e tenta outra ação.
+3. Ao encontrar um estado que satisfaz vence/1, a prova fecha no caso base e retorna o EstadoFinal.
+4. Se todas as ações levarem a perda, estado repetido ou esgotarem M, o ramo falha e o backtracking tenta alternativas anteriores.
+
+---
 
 ### EXEMPLO DE CONSULTA:
-
-![][image8]
 
 Essa é a pergunta feita ao Prolog:
 

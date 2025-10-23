@@ -127,7 +127,7 @@ pos_destino((L,C), (L1,C1), PredDiag) :-
     call(PredDiag, (L,C), (L1,C1)),
     \+ inacessivel((L1,C1)).
 
-% usar DISCO ao subir pela esquerda, quando em (5,c) e DC ativo
+% usar DISCO ao subir pela esquerda, quando em (5,C) e DC ativo
 acao(mover_sup_esq,
      estado((6,d), Modo, Blocos, ativo, DM, M),
      estado((2,h), Modo1, Blocos1, usado, DM, M1)) :-
@@ -140,7 +140,7 @@ acao(mover_sup_esq,
     dbg('acao(mover_sup_esq/disco C): 5,c -> 2,h  M:~w->~w~n', [M,M1]).
 
 
-% usar DISCO ao subir pela direita, quando em (5,m) e DM ativo
+% usar DISCO ao subir pela direita, quando em (5,M) e DM ativo
 acao(mover_sup_dir,
      estado((6,l), Modo, Blocos, DC, ativo, M),
      estado((2,h), Modo1, Blocos1, DC, usado, M1)) :-
@@ -161,7 +161,7 @@ acao(mover_sup_esq, %nome da ação
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ; Blocos1 = Blocos
     ),
-    M1 is M - 1,
+    M1 is M - 1.
     dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 

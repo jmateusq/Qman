@@ -116,13 +116,20 @@ col_dir(C, C1) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % atualiza_blocos(+Modo, +Pos, +BlocosIn, -BlocosOut)
 % (Modo por enquanto não altera a regra; fácil estender depois)
-atualiza_blocos(_Modo, Pos, BlocosIn, BlocosOut):-
-    ( member(Pos, BlocosIn) %se o bloco já está ligado, não faz nada
-    -> BlocosOut = BlocosIn
-    ; BlocosOut = [Pos|BlocosIn] %senão, liga o bloco
+atualiza_blocos(Modo, Pos, BlocosIn, BlocosOut):-
+    (   Modo = normal
+    ->  % comportamento original: liga o bloco se ainda não estiver ligado
+        ( member(Pos, BlocosIn)
+        -> BlocosOut = BlocosIn
+        ;  BlocosOut = [Pos|BlocosIn]
+        )
+    ;   Modo = poder
+    ->  % modo poder: desliga o bloco (remove Pos da lista)
+        delete(BlocosIn, Pos, BlocosOut)
+    ;   % modo desconhecido (fallback)
+        BlocosOut = BlocosIn
     ),
-    dbg('   [atualiza_blocos] Pos ~w -> ~w~n', [Pos, BlocosOut]).
-
+    dbg('   [atualiza_blocos] (~w) Pos ~w -> ~w~n', [Modo, Pos, BlocosOut]).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

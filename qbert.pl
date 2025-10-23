@@ -26,6 +26,8 @@ inicio(estado((2,h), normal, [], ativo, ativo, 50, [])).
 resolve_unica(EstadoFinal) :-
     once(consegue(EstadoFinal)).
 
+mknode(Pos, Modo, Blocos, DC, DM, M, InimigosMortos,
+       estado(Pos, Modo, Blocos, DC, DM, M, InimigosMortos)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MAPA ESTÁTICO
@@ -186,14 +188,17 @@ acao(mover_sup_esq, %nome da ação Geral
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ; Blocos1 = Blocos
     ),
-    M1 is M - 1.
+    M1 is M - 1,
     dbg('acao(mover_sup_esq): ~w,~w -> ~w,~w  M:~w->~w~n',[L,C,L1,C1,M,M1]).
 
 acao(mover_sup_dir,
     estado((L,C),Modo,Blocos,DC,DM,M,Mortos), %estado atual
-    estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
+    estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos1)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_sup_dir),
-    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
+    dbg('Mortos antes ~w~n',[Mortos]),
+    mata_inimigo_if_poder(Modo, (L1,C1), Mortos, Mortos1), %atualiza lista de inimigos mortos se estiver em modo poder
+    dbg('Mortos depois ~w~n',[Mortos1]),
+    (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos1)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
     ; Blocos1 = Blocos
@@ -207,6 +212,7 @@ acao(mover_inf_esq,
     estado((L,C),Modo,Blocos,DC,DM,M,Mortos), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_inf_esq),
+    mata_inimigo_if_poder(Modo, (L1,C1), Mortos, Mortos), %atualiza lista de inimigos mortos se estiver em modo poder
     (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
@@ -221,6 +227,7 @@ acao(mover_inf_dir,
     estado((L,C),Modo,Blocos,DC,DM,M,Mortos), %estado atual
     estado((L1,C1),Modo,Blocos1,DC,DM,M1,Mortos)) :- %estado resultante
     pos_destino((L,C),(L1,C1),diagonal_inf_dir),
+    mata_inimigo_if_poder(Modo, (L1,C1), Mortos, Mortos), %atualiza lista de inimigos mortos se estiver em modo poder
     (perde(estado((L1,C1),Modo,Blocos,DC,DM,M,Mortos)) -> fail ; true),
     (  verde((L1,C1))
     -> atualiza_blocos(Modo,(L1,C1),Blocos,Blocos1)
@@ -235,10 +242,12 @@ acao(mover_inf_dir,
 % PERDA / VITÓRIA
 perde(estado((L,C),_,_,_,_,_,Mortos)) :-
     (   vermelho((L,C))
-    ;   ( inimigo((L,C)),
-          \+ member((L,C), Mortos) )
-    ),
-    dbg('  [perde] caiu em ~w,~w~n', [L,C]).
+    ->  dbg('  [perde] caiu em ~w,~w~n', [L,C])
+    ;   (   inimigo((L,C)), \+ member((L,C), Mortos)
+        ->  dbg('  [perde] inimigo em ~w,~w não está morto~n', [L,C])
+        ;   fail
+        )
+    ).
 
 
 % vitória: todas as verdes ligadas e M >= 0
@@ -296,8 +305,8 @@ mata_inimigo_if_poder(Modo, Pos, MortosIn, MortosOut) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % UTILIDADE: mostrar estado bonitinho
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-show_estado(estado((L,C),Modo,Blocos,DC,DM,M,_)) :-
-    format('Pos: (~w,~w)  Modo: ~w  DC: ~w  DM: ~w  M: ~w~n', [L,C,Modo,DC,DM,M]),
+show_estado(estado((L,C),Modo,Blocos,DC,DM,M,Mortos)) :-
+    format('Pos: (~w,~w)  Modo: ~w  DC: ~w  DM: ~w  M: ~w~n, Mortos: ~w~n', [L,C,Modo,DC,DM,M,Mortos]),
     sort(Blocos, Bs), format('Ligados: ~w~n', [Bs]).
 
 
